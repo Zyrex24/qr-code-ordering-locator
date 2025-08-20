@@ -1,0 +1,127 @@
+@startuml QR_Code_Ordering_Locator_ER_Diagram
+
+!define PRIMARY_KEY(x) <b><color:#b8861b><&key></color> x</b>
+!define FOREIGN_KEY(x) <color:#aaaaaa><&key></color> x
+!define COLUMN(x) <color:#efefef><&media-record></color> x
+!define TABLE(x) entity x << (T, #FFAAAA) >>
+
+TABLE(users) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  COLUMN(name) : VARCHAR(100) <<not null>>
+  COLUMN(email) : VARCHAR(255) <<unique, not null>>
+  COLUMN(phone) : VARCHAR(20)
+  COLUMN(password) : VARCHAR(255) <<not null>>
+  COLUMN(role) : VARCHAR(20) <<not null>>
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+  COLUMN(updated_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(settings) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  COLUMN(restaurant_name) : VARCHAR(255) <<not null>>
+  COLUMN(address) : TEXT
+  COLUMN(phone) : VARCHAR(20)
+  COLUMN(email) : VARCHAR(255)
+  COLUMN(opening_hours) : VARCHAR(500)
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+  COLUMN(updated_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(restaurant_tables) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  COLUMN(number) : INTEGER <<unique, not null>>
+  COLUMN(qr_code_url) : VARCHAR(500) <<not null>>
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+  COLUMN(updated_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(categories) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  COLUMN(name) : VARCHAR(100) <<not null>>
+  COLUMN(description) : TEXT
+  COLUMN(display_order) : INTEGER <<default 0>>
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+  COLUMN(updated_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(products) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  FOREIGN_KEY(category_id) : BIGINT <<not null>>
+  COLUMN(name) : VARCHAR(100) <<not null>>
+  COLUMN(description) : TEXT
+  COLUMN(price) : DECIMAL(10,2) <<not null>>
+  COLUMN(image_url) : VARCHAR(500)
+  COLUMN(available) : BOOLEAN <<default true>>
+  COLUMN(display_order) : INTEGER <<default 0>>
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+  COLUMN(updated_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(orders) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  FOREIGN_KEY(customer_id) : BIGINT <<not null>>
+  FOREIGN_KEY(table_id) : BIGINT <<not null>>
+  COLUMN(total_price) : DECIMAL(10,2) <<not null>>
+  COLUMN(status) : VARCHAR(20) <<not null>>
+  COLUMN(special_instructions) : TEXT
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+  COLUMN(updated_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(order_items) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  FOREIGN_KEY(order_id) : BIGINT <<not null>>
+  FOREIGN_KEY(product_id) : BIGINT <<not null>>
+  COLUMN(quantity) : INTEGER <<not null>>
+  COLUMN(unit_price) : DECIMAL(10,2) <<not null>>
+  COLUMN(total_price) : DECIMAL(10,2) <<not null>>
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(order_status_changes) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  FOREIGN_KEY(order_id) : BIGINT <<not null>>
+  COLUMN(old_status) : VARCHAR(20)
+  COLUMN(new_status) : VARCHAR(20) <<not null>>
+  COLUMN(changed_by) : VARCHAR(255)
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(reviews) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  FOREIGN_KEY(order_id) : BIGINT <<not null>>
+  FOREIGN_KEY(customer_id) : BIGINT <<not null>>
+  COLUMN(rating) : INTEGER <<not null, check 1-5>>
+  COLUMN(comment) : TEXT
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+}
+
+TABLE(enquiries) {
+  PRIMARY_KEY(id) : BIGINT <<generated>>
+  FOREIGN_KEY(customer_id) : BIGINT
+  COLUMN(name) : VARCHAR(100) <<not null>>
+  COLUMN(email) : VARCHAR(255) <<not null>>
+  COLUMN(subject) : VARCHAR(200) <<not null>>
+  COLUMN(message) : TEXT <<not null>>
+  COLUMN(visible) : BOOLEAN <<default true>>
+  COLUMN(created_at) : TIMESTAMP <<default now()>>
+}
+
+' Relationships
+products ||--o{ categories : belongs_to
+orders ||--o{ users : placed_by
+orders ||--o{ restaurant_tables : at_table
+order_items }o--|| orders : part_of
+order_items }o--|| products : contains
+order_status_changes }o--|| orders : tracks
+reviews ||--o{ orders : reviews
+reviews ||--o{ users : written_by
+enquiries }o--o{ users : submitted_by
+
+' Notes
+note right of users : Roles: ADMIN, CASHIER, CUSTOMER
+note right of orders : Status: PENDING, IN_PREPARATION, READY, DELIVERED, CANCELLED
+note right of products : Prices stored as DECIMAL(10,2)
+note right of order_items : Unit price snapshot at order time
+
+@enduml
