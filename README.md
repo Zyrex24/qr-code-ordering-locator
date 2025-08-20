@@ -182,10 +182,3 @@ The GitHub Actions workflow automatically:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-For support and questions:
-- **Issues**: [GitHub Issues](https://github.com/Zyrex24/qr-code-ordering-locator/issues)
-- **Email**: support@qrlocator.com
-- **Documentation**: [API Docs](http://localhost:8080/swagger-ui.html)
