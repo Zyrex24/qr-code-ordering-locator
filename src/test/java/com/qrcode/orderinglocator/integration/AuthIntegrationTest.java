@@ -3,6 +3,7 @@ package com.qrcode.orderinglocator.integration;
 import com.qrcode.orderinglocator.dto.auth.AuthResponse;
 import com.qrcode.orderinglocator.dto.auth.LoginRequest;
 import com.qrcode.orderinglocator.dto.auth.RegisterRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,36 @@ class AuthIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @BeforeEach
+    void setUp() {
+        // Wait for the application to be fully started with retry logic
+        int maxRetries = 30;
+        int retryCount = 0;
+        boolean serverReady = false;
+        
+        while (retryCount < maxRetries && !serverReady) {
+            try {
+                ResponseEntity<String> healthResponse = restTemplate.getForEntity(
+                    "http://localhost:" + port + "/actuator/health", String.class);
+                if (healthResponse.getStatusCode().is2xxSuccessful()) {
+                    serverReady = true;
+                }
+            } catch (Exception e) {
+                retryCount++;
+                try {
+                    Thread.sleep(500); // Wait 500ms between retries
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+        
+        if (!serverReady) {
+            throw new RuntimeException("Server failed to start within expected time");
+        }
+    }
 
     @Test
     void register_ValidRequest_ReturnsCreatedWithToken() throws Exception {
