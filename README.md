@@ -2,7 +2,7 @@
 
 A production-ready Spring Boot backend for a QR Code-based restaurant ordering system with JWT authentication, role-based access control, and complete order lifecycle management.
 
-## 🚀 Features
+## Features
 
 - **JWT Authentication** with role-based access control (Admin, Cashier, Customer)
 - **Complete Order Lifecycle** management with status transitions
@@ -14,7 +14,7 @@ A production-ready Spring Boot backend for a QR Code-based restaurant ordering s
 - **CI/CD Pipeline** with GitHub Actions
 - **Newman API Testing** for contract validation
 
-## 🏗️ Architecture
+## Architecture
 
 ### Tech Stack
 - **Java 17** with Spring Boot 3.x
@@ -29,7 +29,7 @@ A production-ready Spring Boot backend for a QR Code-based restaurant ordering s
 ### Database Schema
 ![ER Diagram](docs/er-diagram.puml)
 
-## 🛠️ Quick Start
+## Quick Start
 
 ### Prerequisites
 - Java 17+
@@ -70,7 +70,7 @@ docker build -t qr-ordering-locator .
 docker run -p 8080:8080 qr-ordering-locator
 ```
 
-## 📚 API Documentation
+## API Documentation
 
 ### Authentication Endpoints
 - `POST /api/auth/register` - Register new user
@@ -91,7 +91,7 @@ docker run -p 8080:8080 qr-ordering-locator
 - **Cashier**: `cashier@qrlocator.com` / `Cashier@123`
 - **Customer**: `alice@example.com` / `Customer@123`
 
-## 🧪 Testing
+## Testing
 
 ### Run All Tests
 ```bash
@@ -118,7 +118,7 @@ newman run postman_collection.json -e postman_environment.json
 - **Target**: ≥80% line coverage
 - **Reports**: `target/site/jacoco/index.html`
 
-## 🔒 Security
+## Security
 
 ### JWT Configuration
 - **Algorithm**: HS256
@@ -134,7 +134,7 @@ newman run postman_collection.json -e postman_environment.json
 - **Hashing**: BCrypt with salt
 - **Validation**: Minimum 8 characters, complexity requirements
 
-## 🚀 Deployment
+## Deployment
 
 ### Environment Variables
 ```bash
@@ -159,7 +159,7 @@ The GitHub Actions workflow automatically:
 4. Builds and tests Docker images
 5. Reports test results and coverage
 
-## 📊 Monitoring
+## Monitoring
 
 ### Health Checks
 - **Application**: `/actuator/health`
@@ -171,7 +171,7 @@ The GitHub Actions workflow automatically:
 - **Format**: Structured JSON in production
 - **Key Events**: Authentication, order lifecycle, errors
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -179,11 +179,11 @@ The GitHub Actions workflow automatically:
 4. Ensure all tests pass and coverage is maintained
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## Support
 
 For support and questions:
 - **Issues**: [GitHub Issues](https://github.com/Zyrex24/qr-code-ordering-locator/issues)
