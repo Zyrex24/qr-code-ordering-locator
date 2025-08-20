@@ -14,9 +14,9 @@
     <name>QR Code Ordering Locator</name>
     <description>Production-ready Spring Boot backend for QR Code Ordering Locator system</description>
     <properties>
-        <java.version>23</java.version>
-        <maven.compiler.source>23</maven.compiler.source>
-        <maven.compiler.target>23</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <testcontainers.version>1.19.3</testcontainers.version>
         <jacoco.version>0.8.12</jacoco.version>
