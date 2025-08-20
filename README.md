@@ -7,24 +7,22 @@ A production-ready Spring Boot backend for a QR Code-based restaurant ordering s
 - **JWT Authentication** with role-based access control (Admin, Cashier, Customer)
 - **Complete Order Lifecycle** management with status transitions
 - **QR Code Integration** for table-based ordering
-- **PostgreSQL** persistence with Flyway migrations
-- **Comprehensive Testing** with JUnit 5, Mockito, and Testcontainers
+- **H2 Database** for lightweight development and testing
+- **Comprehensive Testing** with JUnit 5 and Mockito
 - **API Documentation** with OpenAPI/Swagger
 - **Docker Support** with multi-stage builds
-- **CI/CD Pipeline** with GitHub Actions
 - **Newman API Testing** for contract validation
 
 ## Architecture
 
 ### Tech Stack
-- **Java 17** with Spring Boot 3.x
+- **Java 21** with Spring Boot 3.2.0
 - **Maven** for build management
-- **PostgreSQL 14+** with Flyway migrations
+- **H2 Database** for development and testing
+- **PostgreSQL 14+** for production (optional)
 - **Spring Security** with JWT tokens
 - **JUnit 5 + Mockito** for unit testing
-- **Testcontainers** for integration testing
 - **Docker** for containerization
-- **GitHub Actions** for CI/CD
 
 ### Database Schema
 ![ER Diagram](docs/er-diagram.puml)
@@ -32,9 +30,9 @@ A production-ready Spring Boot backend for a QR Code-based restaurant ordering s
 ## Quick Start
 
 ### Prerequisites
-- Java 17+
+- Java 21+
 - Maven 3.6+
-- PostgreSQL 14+ (or Docker)
+- No external database required (uses H2)
 
 ### Local Development
 
@@ -44,20 +42,16 @@ A production-ready Spring Boot backend for a QR Code-based restaurant ordering s
    cd qr-code-ordering-locator
    ```
 
-2. **Start PostgreSQL with Docker**
-   ```bash
-   docker-compose up postgres -d
-   ```
-
-3. **Run the application**
+2. **Run the application**
    ```bash
    mvn spring-boot:run
    ```
 
-4. **Access the API**
+3. **Access the API**
    - Application: http://localhost:8080
    - Swagger UI: http://localhost:8080/swagger-ui.html
    - Health Check: http://localhost:8080/actuator/health
+   - H2 Console: http://localhost:8080/h2-console (JDBC URL: jdbc:h2:mem:testdb)
 
 ### Docker Deployment
 
@@ -151,13 +145,11 @@ JWT_EXPIRATION=3600000
 SPRING_PROFILES_ACTIVE=production
 ```
 
-### CI/CD Pipeline
-The GitHub Actions workflow automatically:
-1. Runs unit and integration tests
-2. Enforces code coverage thresholds
-3. Executes Newman API tests
-4. Builds and tests Docker images
-5. Reports test results and coverage
+### Development Notes
+- Uses H2 in-memory database for simplified development
+- Sample data is automatically initialized on startup
+- No external dependencies required for local development
+- Tests run with isolated H2 instances
 
 ## Monitoring
 
