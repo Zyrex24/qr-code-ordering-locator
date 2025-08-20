@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: qr-ordering-postgres
+    environment:
+      POSTGRES_DB: qr_ordering_locator
+      POSTGRES_USER: qr_user
+      POSTGRES_PASSWORD: qr_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qr_user -d qr_ordering_locator"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: qr-ordering-app
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/qr_ordering_locator
+      SPRING_DATASOURCE_USERNAME: qr_user
+      SPRING_DATASOURCE_PASSWORD: qr_password
+      JWT_SECRET: mySecretKey123456789012345678901234567890
+      JWT_EXPIRATION: 3600000
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  postgres_data:
