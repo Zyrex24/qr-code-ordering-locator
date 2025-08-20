@@ -1,49 +1,31 @@
 package com.qrcode.orderinglocator.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qrcode.orderinglocator.dto.auth.AuthResponse;
 import com.qrcode.orderinglocator.dto.auth.LoginRequest;
 import com.qrcode.orderinglocator.dto.auth.RegisterRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureTestMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureTestMvc
-@Testcontainers
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 class AuthIntegrationTest {
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+    @LocalServerPort
+    private int port;
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
+    private TestRestTemplate restTemplate;
 
     @Test
     void register_ValidRequest_ReturnsCreatedWithToken() throws Exception {
@@ -53,21 +35,23 @@ class AuthIntegrationTest {
         request.setPhone("+1234567890");
         request.setPassword("Password@123");
 
-        MvcResult result = mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.email").value("john.doe@example.com"))
-                .andExpect(jsonPath("$.name").value("John Doe"))
-                .andExpect(jsonPath("$.role").value("CUSTOMER"))
-                .andReturn();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<RegisterRequest> entity = new HttpEntity<>(request, headers);
 
-        String responseContent = result.getResponse().getContentAsString();
-        AuthResponse authResponse = objectMapper.readValue(responseContent, AuthResponse.class);
-        assertThat(authResponse.getToken()).isNotEmpty();
-        assertThat(authResponse.getId()).isNotNull();
+        ResponseEntity<AuthResponse> response = restTemplate.postForEntity(
+                "http://localhost:" + port + "/api/auth/register",
+                entity,
+                AuthResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getToken()).isNotEmpty();
+        assertThat(response.getBody().getEmail()).isEqualTo("john.doe@example.com");
+        assertThat(response.getBody().getName()).isEqualTo("John Doe");
+        assertThat(response.getBody().getRole().toString()).isEqualTo("CUSTOMER");
+        assertThat(response.getBody().getId()).isNotNull();
     }
 
     @Test
@@ -76,19 +60,21 @@ class AuthIntegrationTest {
         request.setEmail("admin@qrlocator.com");
         request.setPassword("Admin@123");
 
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.email").value("admin@qrlocator.com"))
-                .andExpect(jsonPath("$.role").value("ADMIN"))
-                .andReturn();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(request, headers);
 
-        String responseContent = result.getResponse().getContentAsString();
-        AuthResponse authResponse = objectMapper.readValue(responseContent, AuthResponse.class);
-        assertThat(authResponse.getToken()).isNotEmpty();
+        ResponseEntity<AuthResponse> response = restTemplate.postForEntity(
+                "http://localhost:" + port + "/api/auth/login",
+                entity,
+                AuthResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getToken()).isNotEmpty();
+        assertThat(response.getBody().getEmail()).isEqualTo("admin@qrlocator.com");
+        assertThat(response.getBody().getRole().toString()).isEqualTo("ADMIN");
     }
 
     @Test
@@ -97,10 +83,17 @@ class AuthIntegrationTest {
         request.setEmail("admin@qrlocator.com");
         request.setPassword("WrongPassword");
 
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Invalid email or password"));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "http://localhost:" + port + "/api/auth/login",
+                entity,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).contains("Invalid email or password");
     }
 }

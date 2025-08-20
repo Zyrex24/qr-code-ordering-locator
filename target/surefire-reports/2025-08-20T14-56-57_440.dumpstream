@@ -1,0 +1,5 @@
+# Created at 2025-08-20T14:56:57.630
+Boot Manifest-JAR contains absolute paths in classpath 'E:\Visual_Studio\CODES\QrCodeOrderingLocator\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
