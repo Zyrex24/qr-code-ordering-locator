@@ -30,7 +30,7 @@ spring:
       expiration: ${JWT_EXPIRATION:3600000} # 1 hour in milliseconds
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:0}
 
 management:
   endpoints:

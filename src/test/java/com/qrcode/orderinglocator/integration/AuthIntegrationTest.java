@@ -56,6 +56,13 @@ class AuthIntegrationTest {
         if (!serverReady) {
             throw new RuntimeException("Server failed to start within expected time");
         }
+        
+        // Additional wait to ensure DataInitializer has completed
+        try {
+            Thread.sleep(2000); // Wait 2 seconds for data initialization
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Test
