@@ -1,5 +1,5 @@
 # Multi-stage build for Spring Boot application
-FROM maven:3.9.4-openjdk-17-slim AS build
+FROM maven:3.9.4-openjdk-23-slim AS build
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Production stage
-FROM openjdk:17-jre-slim
+FROM openjdk:23-jre-slim
 
 WORKDIR /app
 
